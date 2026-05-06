@@ -24,12 +24,17 @@ Initial public release.
 - Homebrew cask formula
 - GitHub Actions auto-release on tag
 
-### IOCs detected
-- Source signature: `rmcej%otb%`
+### IOCs detected (per [OSM PolinRider dossier](https://github.com/OpenSourceMalware/PolinRider))
+- Source signatures: `rmcej%otb%` (v1) and `Cot%3t=shtP` (v2 — to be added)
 - Payload prefix: `global['!']='`
-- Persistence paths: `~/openclaw-app`, `~/.openclaw`, `~/.node_modules`
 - Process pattern: `node -e global['_V']=`
 - C2 servers: `auth-con-firm.vercel.app`, `auth-rho-dun.vercel.app`
-- Forbidden files: `config.bat`, `temp_auto_push.bat`, `temp_interactive_push.bat`
+- Forbidden files: `temp_auto_push.bat`, `temp_interactive_push.bat`, `config.bat`
+
+### Known limitations / roadmap
+- v2 obfuscator variant (`Cot%3t=shtP`) detection not yet in scan rules — issue tracked.
+- Additional C2 domains documented by OSM (`default-configuration.vercel.app`, `260120.vercel.app`, etc.) not yet in the `/etc/hosts` block — issue tracked.
+- `.vscode/tasks.json` `curl | bash` pattern detection not yet implemented — issue tracked.
+- Fake `.woff2` font payload detection not yet implemented — issue tracked.
 
 [1.0.0]: https://github.com/Louay24/polinshield/releases/tag/v1.0.0

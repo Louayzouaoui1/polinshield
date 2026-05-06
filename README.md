@@ -20,20 +20,27 @@
 
 ---
 
-PolinShield protects macOS dev machines against the **PolinRider/openclaw npm supply-chain attack** and similar threats. It installs and monitors a 5-layer defense visible at all times in your menu bar — and is built specifically for the attack pattern that hit dozens of GitHub repositories in 2026.
+PolinShield protects macOS dev machines against the **PolinRider supply-chain campaign** — an active, DPRK-attributed attack that has compromised **1,951+ public GitHub repositories belonging to 1,047+ unique owners** as of April 2026, with the scope **doubling every ~5 weeks**.
 
-> ⚠️ **This isn't theoretical.** PolinShield was built after a confirmed infection that resulted in **200+ malicious force-pushes to 68 repositories over 5 days**. Read the [full threat writeup](docs/THREAT.md).
+> ⚠️ **This is not theoretical.** PolinRider is a confirmed Lazarus-cluster operation tracked by [OpenSourceMalware](https://github.com/OpenSourceMalware/PolinRider). It has operationally merged with the **TasksJacker** and **Contagious Interview** campaigns. Read the [full threat writeup](docs/THREAT.md).
 
 ## What it stops
 
-In May 2026, an npm package called `openclaw` (a "Claude AI gateway") was distributed to developers. Its `postinstall` script:
+PolinRider attacks JavaScript developers via **four parallel injection vectors**, all converging on the same obfuscated payload:
 
-- Dropped `~/openclaw-app/`, `~/.openclaw/`, `~/.node_modules/` on the victim's Mac
-- Spawned a hidden `node -e global['_V']=...` process via a LaunchAgent
-- Silently appended obfuscated payloads to `postcss.config.*`, `tailwind.config.*`, `eslint.config.*`, `next.config.*`, `vite.config.*`
-- Removed `.env*` from `.gitignore` so `.env` files would leak
-- **Force-pushed payloads to every branch on every repo** the victim had write access to
-- Phoned home to `auth-con-firm.vercel.app` and `auth-rho-dun.vercel.app`
+1. **Config-file injection** — appends payload to `postcss.config.*`, `tailwind.config.*`, `eslint.config.*`, `next.config.*`, `vite.config.*`, `webpack.config.js`, etc.
+2. **Malicious npm packages** — including `tailwindcss-style-animate`, `tailwind-mainanimation`, and others in the Tailwind/PostCSS ecosystem. Successful spread: Neutralinojs (8,400+ stars) was compromised, infecting hundreds of downstream users.
+3. **`.vscode/tasks.json`** — `curl | bash` payloads pointing at attacker-controlled Vercel C2 servers.
+4. **Fake `.woff2` font files** — payload hidden in binary assets, executed via Node.
+
+Once on a dev's machine, the malware:
+
+- Spawns a hidden `node -e global['_V']=...` process
+- Removes `.env*` from `.gitignore` so secrets would leak
+- Drops `temp_auto_push.bat` — a Windows batch file that **silently rewrites git commits with falsified timestamps**, force-pushing payloads to every branch the victim can write to
+- Phones home to `auth-con-firm.vercel.app`, `auth-rho-dun.vercel.app`, `default-configuration.vercel.app`, and other Vercel-hosted C2 domains
+
+Two distinct obfuscator variants are active in the wild (`rmcej%otb%` and `Cot%3t=shtP`), and OSM has documented **at least one re-infection** of a previously-cleaned victim. PolinShield detects both.
 
 PolinShield blocks this attack pattern at five independent layers, so even if one fails, the others still catch it.
 
@@ -114,7 +121,7 @@ The Swift binary is ~400 KB. The full source is ~700 lines of Swift + ~250 lines
 
 ### Is the malware still active in the wild?
 
-Yes. The npm package `openclaw` (and several plugins like `openclaw-app`) is still being published with a "Multi-channel AI gateway" tagline. Variants are likely. PolinShield's IOC list is updated as new ones are reported — see [issues](https://github.com/Louay24/polinshield/issues).
+Yes — and growing. As of the most recent OSM dossier update (April 2026), the campaign is **doubling every ~5 weeks**. New variants and C2 domains are appearing regularly. PolinShield's IOC list is updated as new ones are reported — see [issues](https://github.com/Louay24/polinshield/issues) and the [OSM canonical dossier](https://github.com/OpenSourceMalware/PolinRider).
 
 ### Why a menu bar app and not a CLI?
 
@@ -138,9 +145,9 @@ PolinShield is **v1.0.0**. The defenses are battle-tested (I built this after my
 
 ## Credits
 
-- Built by [@Louay24](https://github.com/Louay24) after a confirmed PolinRider/openclaw infection in May 2026.
-- Inspired by realizing that running random "AI agent" CLI tools without sandboxing is the modern equivalent of running random `.exe` files from email.
-- Thanks to [opensourcemalware.com](https://opensourcemalware.com/blog/polinrider-attack) for the original disclosure.
+- Built by [@Louay24](https://github.com/Louay24) after a confirmed PolinRider infection in May 2026.
+- The threat dossier and IOC research is the work of the **[OpenSourceMalware](https://github.com/OpenSourceMalware/PolinRider)** team — please support their work, follow their feed, and report new variants there.
+- Inspired by realizing that the npm install-script attack surface is the modern equivalent of running random `.exe` files from email.
 
 ## License
 
