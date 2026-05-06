@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Build app + DMG
+        run: make dmg
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Compute SHA256 (for Homebrew cask)
+        id: sha
+        run: |
+          shasum -a 256 .build/PolinShield-${{ steps.version.outputs.version }}.dmg | awk '{print $1}' > sha256.txt
+          echo "sha256=$(cat sha256.txt)" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: .build/PolinShield-${{ steps.version.outputs.version }}.dmg
+          body: |
+            ## PolinShield ${{ steps.version.outputs.version }}
+
+            Native macOS menu bar defense against npm supply-chain malware.
+
+            ### Install
+            ```bash
+            brew install --cask louay24/tap/polinshield
+            ```
+
+            Or download the DMG below and drag to /Applications.
+
+            ### SHA256
+            ```
+            ${{ steps.sha.outputs.sha256 }}
+            ```

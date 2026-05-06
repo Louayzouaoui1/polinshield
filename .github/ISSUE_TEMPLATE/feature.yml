@@ -1,0 +1,30 @@
+name: ✨ Feature request
+description: Suggest an idea for PolinShield
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the threat scenario or user pain point.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+  - type: markdown
+    attributes:
+      value: |
+        Note: PolinShield deliberately stays small. We're unlikely to merge:
+        - Telemetry / analytics
+        - Cloud / remote-management features
+        - Auto-updaters
+        - Anything requiring root persistence
+
+        See [CONTRIBUTING.md](https://github.com/Louay24/polinshield/blob/main/CONTRIBUTING.md) for the design philosophy.

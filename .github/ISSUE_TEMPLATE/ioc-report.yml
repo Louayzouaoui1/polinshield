@@ -1,0 +1,59 @@
+name: 🚨 Report new IOC
+description: Report a new malware indicator (IOC) you've found
+title: "[IOC] "
+labels: ["ioc", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep developers safe. Reporting a new IOC is the most useful contribution you can make to PolinShield.
+  - type: dropdown
+    id: ioc-type
+    attributes:
+      label: IOC type
+      options:
+        - Source code signature (string in a config file)
+        - Persistence path (~/openclaw-app, etc.)
+        - Process pattern
+        - C2 domain
+        - npm package name
+        - File name (forbidden artifact)
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: ioc-value
+    attributes:
+      label: The IOC itself
+      description: The exact string, path, or domain. Use a code block.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where you found it
+      description: e.g. "in postcss.config.mjs of one of my repos", "in a process list", "in /etc/hosts of an infected machine". Anonymize sensitive details.
+    validations:
+      required: true
+  - type: input
+    id: date
+    attributes:
+      label: Approximate date you encountered it
+      placeholder: "2026-05-06"
+  - type: dropdown
+    id: detected
+    attributes:
+      label: Does PolinShield's current scan catch it?
+      description: Run the scan and check.
+      options:
+        - "Yes — already detected"
+        - "No — needs to be added"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Context, links, related IOCs, etc.

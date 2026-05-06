@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PolinShield — Menu bar defense against npm supply-chain malware</title>
+<meta name="description" content="Native macOS app that protects your dev machine from PolinRider, openclaw and similar npm supply-chain attacks. 5 layers, one click.">
+<meta property="og:title" content="PolinShield">
+<meta property="og:description" content="Menu bar defense against npm supply-chain malware on macOS">
+<style>
+:root {
+  --bg: #0d1117; --fg: #e6edf3; --muted: #7d8590; --accent: #58a6ff;
+  --good: #3fb950; --bad: #f85149; --warn: #d29922; --border: #30363d;
+  --code-bg: #161b22; --gradient-1: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 17px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Hero */
+.hero { padding: 80px 24px 60px; max-width: 1100px; margin: 0 auto; text-align: center; }
+.hero-shield { font-size: 80px; line-height: 1; margin-bottom: 20px; filter: drop-shadow(0 8px 24px rgba(88, 166, 255, 0.3)); }
+.hero h1 { font-size: 56px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; background: var(--gradient-1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p.tagline { font-size: 22px; color: var(--muted); margin-bottom: 36px; max-width: 720px; margin-left: auto; margin-right: auto; }
+.cta { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; background: var(--accent); color: #fff; font-weight: 600; border-radius: 10px; transition: transform 0.15s, box-shadow 0.15s; margin: 0 8px 12px; }
+.cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(88, 166, 255, 0.3); text-decoration: none; }
+.cta.secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+.cta.secondary:hover { background: var(--code-bg); }
+.copy-cmd { display: inline-block; background: var(--code-bg); border: 1px solid var(--border); padding: 12px 18px; border-radius: 8px; font-family: "SF Mono", Monaco, monospace; font-size: 14px; margin-top: 16px; cursor: pointer; }
+.copy-cmd:hover { border-color: var(--accent); }
+
+/* Sections */
+section { max-width: 1100px; margin: 0 auto; padding: 60px 24px; }
+section h2 { font-size: 36px; letter-spacing: -0.02em; margin-bottom: 12px; }
+section p.section-intro { color: var(--muted); font-size: 18px; margin-bottom: 36px; }
+
+/* Why */
+.why { background: rgba(248, 81, 73, 0.05); border-top: 1px solid rgba(248, 81, 73, 0.2); border-bottom: 1px solid rgba(248, 81, 73, 0.2); }
+.why h2 { color: var(--bad); }
+.threat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.threat { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.threat-icon { font-size: 24px; margin-bottom: 10px; }
+.threat h3 { font-size: 16px; margin-bottom: 6px; }
+.threat p { font-size: 14px; color: var(--muted); }
+
+/* Layers */
+.layers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.layer { background: var(--code-bg); border: 1px solid var(--border); border-radius: 10px; padding: 24px; transition: transform 0.15s, border-color 0.15s; }
+.layer:hover { transform: translateY(-2px); border-color: var(--accent); }
+.layer-num { display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; background: var(--gradient-1); color: #fff; font-weight: 700; border-radius: 50%; margin-bottom: 12px; }
+.layer h3 { font-size: 18px; margin-bottom: 6px; }
+.layer p { color: var(--muted); font-size: 14px; }
+
+/* Screenshots */
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 768px) { .shots { grid-template-columns: 1fr; } }
+.shot { background: var(--code-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.shot h3 { margin-bottom: 8px; }
+.shot p { color: var(--muted); font-size: 14px; }
+.shot-mock { background: #010409; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-top: 12px; font-family: "SF Mono", Monaco, monospace; font-size: 12px; line-height: 1.6; }
+
+/* Footer */
+footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; color: var(--muted); font-size: 14px; margin-top: 60px; }
+footer a { margin: 0 12px; }
+
+/* Code */
+code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: "SF Mono", Monaco, monospace; font-size: 0.9em; }
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; font-family: "SF Mono", Monaco, monospace; font-size: 13px; line-height: 1.5; }
+
+.badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; vertical-align: middle; margin-left: 6px; }
+.badge.good { background: rgba(63, 185, 80, 0.15); color: var(--good); border: 1px solid rgba(63, 185, 80, 0.3); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-shield">🛡️</div>
+  <h1>PolinShield</h1>
+  <p class="tagline">Menu bar defense against npm supply-chain malware on macOS.<br>5 layers of protection. One click to install. Always visible.</p>
+  <div>
+    <a href="https://github.com/Louay24/polinshield/releases/latest" class="cta">Download for macOS</a>
+    <a href="https://github.com/Louay24/polinshield" class="cta secondary">View on GitHub</a>
+  </div>
+  <div>
+    <code class="copy-cmd" onclick="copyCmd(this)">brew install --cask louay24/tap/polinshield</code>
+  </div>
+</div>
+
+<section class="why">
+  <h2>Why this exists</h2>
+  <p class="section-intro">npm supply-chain attacks have <strong>doubled</strong> in 2025-2026. The PolinRider/openclaw campaign hit hundreds of public repos, force-pushing malicious payloads from compromised dev machines for days before detection.</p>
+  <div class="threat-grid">
+    <div class="threat">
+      <div class="threat-icon">📦</div>
+      <h3>Postinstall scripts</h3>
+      <p>npm runs arbitrary code from any package you install. The #1 attack vector.</p>
+    </div>
+    <div class="threat">
+      <div class="threat-icon">🪤</div>
+      <h3>Config injection</h3>
+      <p>Malware silently appends payloads to <code>postcss.config</code>, <code>tailwind.config</code>, etc.</p>
+    </div>
+    <div class="threat">
+      <div class="threat-icon">🔥</div>
+      <h3>Mass force-push</h3>
+      <p>Once it has your git creds, it overwrites every branch on every repo you can push to.</p>
+    </div>
+    <div class="threat">
+      <div class="threat-icon">🔓</div>
+      <h3>.env exfiltration</h3>
+      <p>Removes <code>.env*</code> from <code>.gitignore</code> so any committed env file leaks secrets.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Five-layer defense</h2>
+  <p class="section-intro">Each layer blocks a different stage. Even if 4 fail, the 5th catches it.</p>
+  <div class="layers-grid">
+    <div class="layer">
+      <div class="layer-num">1</div>
+      <h3>Block npm install scripts</h3>
+      <p>Sets <code>ignore-scripts=true</code> in <code>~/.npmrc</code>. Stops postinstall malware before it ever runs.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-num">2</div>
+      <h3>DNS-block C2 servers</h3>
+      <p>Adds known attacker domains to <code>/etc/hosts</code>. If reinfected, can't phone home.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-num">3</div>
+      <h3>Git pre-commit hook</h3>
+      <p>Blocks commits containing malware signatures. Even infected files can't reach your remote.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-num">4</div>
+      <h3>Force-push watcher</h3>
+      <p>Polls GitHub hourly. macOS notification on any unexpected force-push.</p>
+    </div>
+    <div class="layer">
+      <div class="layer-num">5</div>
+      <h3>Daily malware scan</h3>
+      <p>Searches your Desktop at 9am. Catches indicators that slip through other layers.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>What it looks like</h2>
+  <p class="section-intro">Native macOS app — feels like part of your system, not an Electron blob.</p>
+  <div class="shots">
+    <div class="shot">
+      <h3>Menu bar dropdown</h3>
+      <p>Always visible status, defense state, run scan, open dashboard.</p>
+      <pre class="shot-mock">🛡️  PolinShield <span style="color:#3fb950">Protected</span>
+─────────────────────────
+DEFENSES
+  ✓ npm postinstall block
+  ✓ /etc/hosts C2 block
+  ✓ Git pre-commit hook
+  ✓ Force-push watcher
+  ✓ Daily malware scan
+─────────────────────────
+LAST SCAN
+  ✓ Clean       2h ago
+─────────────────────────
+[ Run Scan Now ]
+[ Open Dashboard ]</pre>
+    </div>
+    <div class="shot">
+      <h3>Full dashboard</h3>
+      <p>Scan history, force-push log, defense management.</p>
+      <pre class="shot-mock">🛡️  Protected
+Last scan 2h ago         [Scan Now]
+
+┌─────────┬─────────┬─────────┐
+│ DEFENSES│  SCANS  │ THREATS │
+│  5 / 5  │   42    │    0    │
+└─────────┴─────────┴─────────┘
+
+Defense Layers
+  ✓ Block npm postinstall    Active
+  ✓ DNS-block C2 servers     Active
+  ✓ Git pre-commit hook      Active
+  ✓ Force-push detector      Active
+  ✓ Daily malware scan       Active</pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Install in 30 seconds</h2>
+  <pre><code>brew install --cask louay24/tap/polinshield</code></pre>
+  <p style="color: var(--muted); margin-top: 12px;">First launch shows a setup wizard: scan your Mac, install all defenses, done.</p>
+  <p style="margin-top: 24px;">Or grab the <a href="https://github.com/Louay24/polinshield/releases/latest">latest .dmg</a> from Releases.</p>
+</section>
+
+<section>
+  <h2>Open source · No telemetry</h2>
+  <p class="section-intro">Every line is auditable. The defenses are bash scripts you can read and run standalone. No tracking, no ads, no upsells.</p>
+  <p>
+    <a href="https://github.com/Louay24/polinshield" class="cta">★ Star on GitHub</a>
+    <a href="https://github.com/Louay24/polinshield/blob/main/Resources/scripts" class="cta secondary">Audit the bash defenses</a>
+  </p>
+</section>
+
+<footer>
+  <p>MIT License · Built after the 2026 PolinRider/openclaw incident.</p>
+  <p style="margin-top: 8px;">
+    <a href="https://github.com/Louay24/polinshield">GitHub</a>
+    <a href="https://github.com/Louay24/polinshield/issues">Issues</a>
+    <a href="https://github.com/Louay24/polinshield/releases">Releases</a>
+  </p>
+</footer>
+
+<script>
+function copyCmd(el) {
+  navigator.clipboard.writeText(el.innerText);
+  const orig = el.innerText;
+  el.innerText = 'Copied ✓';
+  el.style.borderColor = 'var(--good)';
+  setTimeout(() => { el.innerText = orig; el.style.borderColor = ''; }, 1500);
+}
+</script>
+
+</body>
+</html>

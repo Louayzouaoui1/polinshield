@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>PolinShield</string>
+    <key>CFBundleDisplayName</key>
+    <string>PolinShield</string>
+    <key>CFBundleIdentifier</key>
+    <string>dev.polinshield.app</string>
+    <key>CFBundleVersion</key>
+    <string>1.0.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleExecutable</key>
+    <string>PolinShield</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>13.0</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>MIT License</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>Show malware detection alerts and force-push warnings.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Send macOS notifications via osascript.</string>
+</dict>
+</plist>

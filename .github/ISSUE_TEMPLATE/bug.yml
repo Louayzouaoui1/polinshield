@@ -1,0 +1,49 @@
+name: 🐛 Bug report
+description: Something doesn't work in PolinShield
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: PolinShield version
+      placeholder: "1.0.0 (from About tab or `defaults read /Applications/PolinShield.app/Contents/Info.plist CFBundleVersion`)"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "14.5 (Sonoma) or 15.0 (Sequoia)"
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Architecture
+      options: ["Apple Silicon", "Intel"]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you tried, what you expected, what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Click the menu bar icon
+        2. Click "Run Scan Now"
+        3. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (if relevant)
+      description: |
+        Run from Terminal to see logs:
+        `/Applications/PolinShield.app/Contents/MacOS/PolinShield 2>&1 | tee polinshield.log`
+      render: shell
