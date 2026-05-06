@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PolinShield — Menu bar defense against npm supply-chain malware</title>
-<meta name="description" content="Native macOS app that protects your dev machine from PolinRider, openclaw and similar npm supply-chain attacks. 5 layers, one click.">
+<meta name="description" content="Native macOS app that protects your dev machine from PolinRider and similar npm supply-chain attacks. 5 layers, one click.">
 <meta property="og:title" content="PolinShield">
 <meta property="og:description" content="Menu bar defense against npm supply-chain malware on macOS">
 <style>
@@ -77,7 +77,7 @@ pre { background: var(--code-bg); border: 1px solid var(--border); border-radius
 <div class="hero">
   <div class="hero-shield">🛡️</div>
   <h1>PolinShield</h1>
-  <p class="tagline">Menu bar defense against npm supply-chain malware on macOS.<br>5 layers of protection. One click to install. Always visible.</p>
+  <p class="tagline">Menu bar defense against the PolinRider npm supply-chain attack on macOS.<br>5 layers of protection. One click to install. Always visible.</p>
   <div>
     <a href="https://github.com/Louay24/polinshield/releases/latest" class="cta">Download for macOS</a>
     <a href="https://github.com/Louay24/polinshield" class="cta secondary">View on GitHub</a>
@@ -89,7 +89,7 @@ pre { background: var(--code-bg); border: 1px solid var(--border); border-radius
 
 <section class="why">
   <h2>Why this exists</h2>
-  <p class="section-intro">npm supply-chain attacks have <strong>doubled</strong> in 2025-2026. The PolinRider/openclaw campaign hit hundreds of public repos, force-pushing malicious payloads from compromised dev machines for days before detection.</p>
+  <p class="section-intro"><strong>PolinRider has compromised 1,951+ public GitHub repositories</strong> across 1,047+ owners. It's an active, DPRK-attributed supply-chain campaign tracked by <a href="https://github.com/OpenSourceMalware/PolinRider">OpenSourceMalware</a>, doubling every ~5 weeks. It uses 4 parallel injection vectors — config files, malicious npm packages, .vscode/tasks.json, and even fake .woff2 fonts.</p>
   <div class="threat-grid">
     <div class="threat">
       <div class="threat-icon">📦</div>
