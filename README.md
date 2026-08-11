@@ -75,8 +75,67 @@ PolinShield is a SwiftUI menu bar app that orchestrates 5 plain-bash defense lay
 | 1 | **Block npm install scripts** | `ignore-scripts=true` in `~/.npmrc` and `~/.config/pnpm/global-config` | Stops postinstall malware before it ever runs. The single most effective defense. |
 | 2 | **DNS-block C2 servers** | Add known attacker domains to `/etc/hosts` as `0.0.0.0` | Even if reinfected, malware can't phone home or fetch new instructions. |
 | 3 | **Git pre-commit hook** | Global hook at `~/.git-hooks/pre-commit` checking for IOC strings, forbidden filenames, and accidentally-staged `.env` files | Infected files can't reach a remote, even if other layers fail locally. |
-| 4 | **Hourly force-push detector** | LaunchAgent calling GitHub Events API every 3600s | Catches active campaigns within an hour, sends macOS notification. |
+| 4 | **Hourly force-push detector** | LaunchAgent calling the GitHub Events + compare APIs every 3600s | Catches active campaigns within an hour. The notification names the repo and branch, so you know what to check. |
 | 5 | **Daily malware scan** | LaunchAgent running at 9am daily | Backstop — searches Desktop for IOC patterns and persistence paths. |
+
+### Force-push detection (layer 4)
+
+PolinRider spreads by **force-pushing** rewritten history to every branch you can
+write to. This layer catches that within the hour.
+
+**Setup — two commands:**
+
+```bash
+brew install gh          # the GitHub CLI does the API calls
+gh auth login            # log in as yourself; needs the default 'repo' scope
+```
+
+That's it. Open PolinShield → **Install** on "Hourly force-push detector". Without
+`gh` authenticated, this layer is silent — the menu bar shows ⚠️ yellow.
+
+**How it detects a force-push.** A normal push adds commits on top of what was there.
+A force-push replaces history, so the new HEAD no longer contains the old commit.
+PolinShield asks GitHub to compare the two:
+
+```
+GET /users/<you>/events          → every push in the last hour
+GET /repos/<repo>/compare/<before>...<head>
+    behind_by > 0                → old HEAD is gone ⇒ history was rewritten ⇒ alert
+```
+
+Brand-new branches (`before` is all zeros) are creates, not rewrites, and are ignored.
+
+> **Note:** GitHub no longer populates the `size`/`forced` fields on PushEvents, so
+> anything still checking `payload.size == 0` silently detects nothing. The compare
+> check above is what actually works.
+
+**What the alert looks like.** The notification names the repos, so you can act
+without opening anything:
+
+```
+🚨 GitHub Force-Push Alert
+Louay24/opti-lens-magic/toumi-optique, tryloop-org/grafana-monitoring-stack/main
+```
+
+Beyond three, it appends `+N more`. Full history lives in the dashboard.
+
+**If the network is down** (launchd fires on wake, before Wi-Fi reconnects), the check
+retries 3×, then exits without moving its watch window forward — so that hour gets
+re-checked on the next run instead of being skipped. It fails closed: a missed check
+is never reported as "all clear".
+
+**Verify it works:**
+
+```bash
+# Run the installed check by hand — exit 0 and no alert means no force-pushes
+bash ~/Library/Application\ Support/PolinShield/check-force-pushes.sh; echo "exit=$?"
+
+# Confirm the hourly agent is loaded
+launchctl print gui/$(id -u)/dev.polinshield.force-push | grep -E "state|last exit code"
+```
+
+`last exit code = 0` means the last run completed. A non-zero code means it couldn't
+reach GitHub and will retry.
 
 ### What you see
 
@@ -98,7 +157,7 @@ PolinShield is built around the assumption that **you shouldn't have to trust me
 - **No telemetry**, no analytics, no error reporting
 - **No auto-update** — updates come via Homebrew or manual DMG re-download
 - **No background daemon as root** — all persistence is at user level
-- **Single network call**, made by the GitHub CLI on your machine: `GET api.github.com/users/<you>/events` once an hour. No data leaves your machine.
+- **Read-only GitHub calls**, made by the GitHub CLI on your machine: `GET /users/<you>/events` once an hour, plus one `GET /repos/.../compare/...` per push found in that hour (usually zero). Nothing is sent anywhere else, and nothing is written to your repos.
 - The actual defenses are **bash scripts you can read and audit**, not opaque Swift code.
 
 The Swift binary is ~400 KB. The full source is ~700 lines of Swift + ~250 lines of bash. Auditable in an afternoon.
@@ -114,7 +173,7 @@ The Swift binary is ~400 KB. The full source is ~700 lines of Swift + ~250 lines
 ## Trade-offs you should know
 
 - **`ignore-scripts=true` breaks packages that need install scripts** (`sharp`, `node-canvas`, native bindings). To install those: `npm install --foreground-scripts <pkg>` after auditing.
-- **Force-push detection requires the GitHub CLI** authenticated as your user (`brew install gh && gh auth login`). Without it, layer 4 is silent.
+- **Force-push detection requires the GitHub CLI** authenticated as your user (`brew install gh && gh auth login`). Without it, layer 4 is silent — the menu bar shows ⚠️ yellow rather than pretending you're covered. It only sees pushes the API reports for your account, so pushes to repos you don't own aren't covered.
 - **Ad-hoc signed.** First launch on each Mac may need a right-click → Open to bypass Gatekeeper. We don't have an Apple Developer ID. If you'd like to donate one, [open an issue](https://github.com/Louay24/polinshield/issues).
 
 ## FAQ
