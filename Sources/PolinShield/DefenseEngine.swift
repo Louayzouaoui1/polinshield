@@ -175,8 +175,10 @@ class DefenseEngine: ObservableObject {
         saveForcePushHistory()
 
         if notify && !newOnes.isEmpty {
-            sendNotification(title: "⚠️ Unexpected GitHub force-push detected",
-                             body: "\(newOnes.count) force-push(es). Open PolinShield dashboard.")
+            // Name the repos/branches in the notification itself; first 3, then "+N more".
+            var targets = newOnes.prefix(3).map { "\($0.repo)/\($0.branch)" }.joined(separator: ", ")
+            if newOnes.count > 3 { targets += " +\(newOnes.count - 3) more" }
+            sendNotification(title: "⚠️ Unexpected GitHub force-push detected", body: targets)
         }
     }
 

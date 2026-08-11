@@ -4,6 +4,25 @@ All notable changes to PolinShield will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- **Layer 4 detected nothing.** Force-push detection relied on `payload.size == 0`,
+  but GitHub no longer populates the `size`/`forced` fields on PushEvents. Replaced
+  with a compare-API check (`behind_by > 0` ⇒ history rewritten), verified against a
+  known real force-push.
+- **Missed checks were silently skipped.** A failed run still advanced its watch
+  window, so force-pushes in that hour were never re-examined. The window is now kept
+  on failure and the hour is re-checked.
+- **Spurious "not authenticated" failures.** The preflight used `gh auth status`,
+  which makes a network call and reports the token as invalid when launchd fires on
+  wake before Wi-Fi reconnects. Now reads the token locally and retries the API 3×.
+
+### Changed
+- Force-push notifications name the repos and branches (up to 3, then `+N more`)
+  instead of only showing a count.
+- README documents layer 4 setup, detection method, and verification commands.
+
 ## [1.0.0] — 2026-05-06
 
 Initial public release.
