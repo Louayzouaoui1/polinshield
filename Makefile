@@ -22,6 +22,7 @@ app: build
 	@cp .build/apple/Products/Release/$(APP_NAME) $(APP_BUNDLE)/Contents/MacOS/
 	@chmod +x $(APP_BUNDLE)/Contents/MacOS/$(APP_NAME)
 	@cp Resources/scripts/*.sh $(APP_BUNDLE)/Contents/Resources/scripts/
+	@cp Resources/AppIcon.icns $(APP_BUNDLE)/Contents/Resources/
 	@chmod +x $(APP_BUNDLE)/Contents/Resources/scripts/*.sh
 	@cp Resources/Info.plist $(APP_BUNDLE)/Contents/Info.plist 2>/dev/null || $(MAKE) gen-plist
 	@codesign --force --deep --sign - $(APP_BUNDLE) 2>&1 | grep -v "replacing existing" || true

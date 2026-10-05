@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="PolinShield">
+  <defs>
+    <linearGradient id="ps-g" gradientUnits="userSpaceOnUse" x1="42" y1="18" x2="214" y2="238">
+      <stop offset="0" stop-color="#5EE6FF"/>
+      <stop offset="1" stop-color="#3FD98A"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- the shield -->
+    <path d="M128 18 214 50v70c0 58-37 99-86 118C79 219 42 178 42 120V50z" stroke="url(#ps-g)" stroke-width="16"/>
+    <!-- your history: three commits on one line -->
+    <path d="M128 92v20M128 144v20" stroke="url(#ps-g)" stroke-width="11"/>
+    <circle cx="128" cy="76" r="15" stroke="url(#ps-g)" stroke-width="10"/>
+    <circle cx="128" cy="128" r="15" stroke="url(#ps-g)" stroke-width="10"/>
+    <circle cx="128" cy="180" r="17" fill="url(#ps-g)" stroke="none"/>
+    <!-- a rogue branch, stopped before it gets out -->
+    <path d="M143 128c18 0 27-6 33-16" stroke="#FF5D6C" stroke-width="10"/>
+    <path d="M178 86l16 16M194 86l-16 16" stroke="#FF5D6C" stroke-width="9"/>
+  </g>
+</svg>

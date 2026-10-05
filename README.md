@@ -1,28 +1,43 @@
+<p align="center"><img src="docs/hero.png" alt="PolinShield: supply-chain malware stops here" width="100%"></p>
+
 <div align="center">
 
-# 🛡️ PolinShield
+<img src="docs/brand/logo.svg" width="72" alt="">
+
+# PolinShield
 
 **Native macOS menu bar defense against npm supply-chain malware.**
 
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-007AFF?logo=apple)](https://www.apple.com/macos)
 [![Swift 6](https://img.shields.io/badge/Swift-6-FA7343?logo=swift)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Louayzouaoui1/polinshield?include_prereleases)](https://github.com/Louayzouaoui1/polinshield/releases)
 [![Build](https://github.com/Louayzouaoui1/polinshield/actions/workflows/build.yml/badge.svg)](https://github.com/Louayzouaoui1/polinshield/actions/workflows/build.yml)
 
 [Install](#install) ·
 [How it works](#how-it-works) ·
 [The threat](docs/THREAT.md) ·
-[Architecture](docs/ARCHITECTURE.md) ·
-[Website](https://louayzouaoui1.github.io/polinshield)
+[Architecture](docs/ARCHITECTURE.md)
 
 </div>
+
+<p align="center"><img src="docs/demo.gif" alt="PolinShield demo" width="100%"></p>
+
+▶ **[Watch the 26-second video](docs/polinshield.mp4)**
 
 ---
 
 PolinShield protects macOS dev machines against the **PolinRider supply-chain campaign** — an active, DPRK-attributed attack that has compromised **1,951+ public GitHub repositories belonging to 1,047+ unique owners** as of April 2026, with the scope **doubling every ~5 weeks**.
 
 > ⚠️ **This is not theoretical.** PolinRider is a confirmed Lazarus-cluster operation tracked by [OpenSourceMalware](https://github.com/OpenSourceMalware/PolinRider). It has operationally merged with the **TasksJacker** and **Contagious Interview** campaigns. Read the [full threat writeup](docs/THREAT.md).
+
+## At a glance
+
+| | |
+|---|---|
+| <img src="docs/threat.png" width="480"> | **The threat hides off-screen.** PolinRider appends obfuscated code to ordinary config files, behind hundreds of spaces where nobody scrolls. |
+| <img src="docs/layers.png" width="480"> | **Five layers, one click.** Install scripts off, attacker domains blocked, a pre-commit hook, hourly force-push checks and a daily scan. The menu bar turns green when all five are active. |
+| <img src="docs/hook.png" width="480"> | **Infected files never leave your machine.** The global pre-commit hook stops indicators and staged `.env` files before they reach a remote. |
+| <img src="docs/alert.png" width="480"> | **Know within the hour.** Every push is checked against GitHub's compare API. A rewrite raises an alert that names the repo and branch. |
 
 ## What it stops
 
@@ -46,18 +61,6 @@ PolinShield blocks this attack pattern at five independent layers, so even if on
 
 ## Install
 
-### Homebrew
-
-```bash
-brew install --cask louayzouaoui1/tap/polinshield
-```
-
-### Direct download
-
-[**↓ Latest Release (.dmg)**](https://github.com/Louayzouaoui1/polinshield/releases/latest)
-
-### Build from source
-
 ```bash
 git clone https://github.com/Louayzouaoui1/polinshield.git
 cd polinshield
@@ -65,6 +68,7 @@ make install     # builds, signs, installs to /Applications
 ```
 
 Requires macOS 14+ and Swift 6. See [INSTALL.md](docs/INSTALL.md) for details and Gatekeeper bypass instructions.
+A notarised `.dmg` and the Homebrew cask are coming back with the next tagged release.
 
 ## How it works
 
@@ -114,7 +118,7 @@ without opening anything:
 
 ```
 🚨 GitHub Force-Push Alert
-Louay24/opti-lens-magic/toumi-optique, tryloop-org/grafana-monitoring-stack/main
+acme/web/main, acme/api/staging
 ```
 
 Beyond three, it appends `+N more`. Full history lives in the dashboard.

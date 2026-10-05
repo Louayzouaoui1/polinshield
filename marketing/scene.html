@@ -1,0 +1,176 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>PolinShield scene</title>
+<!-- Marketing scene. render(t) draws the frame at t seconds; render.mjs screenshots it.
+     Indicator strings are assembled at runtime so this file never trips an IOC scanner. -->
+<style>
+:root{
+  --g1:#5EE6FF;--g2:#3FD98A;--red:#FF5D6C;--amber:#FFC24D;--good:#3FD98A;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;--rounded:ui-rounded,"SF Pro Rounded",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#05070a;color:#fff;font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:absolute;inset:0;overflow:hidden}
+.wall{position:absolute;inset:0;background:
+  radial-gradient(1000px 700px at 80% 15%,rgba(94,230,255,.20),transparent 60%),
+  radial-gradient(900px 700px at 12% 92%,rgba(63,217,138,.18),transparent 60%),
+  radial-gradient(700px 500px at 96% 96%,rgba(255,93,108,.10),transparent 60%),
+  linear-gradient(160deg,#08121a,#05070a 55%,#07100c)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:64px 64px;-webkit-mask:radial-gradient(900px 600px at 70% 50%,#000,transparent)}
+/* panels */
+.win{position:absolute;border-radius:16px;background:#0f1318;border:1px solid rgba(255,255,255,.09);box-shadow:0 40px 120px rgba(0,0,0,.6);overflow:hidden}
+.bar{height:40px;background:#151a20;display:flex;align-items:center;gap:8px;padding:0 16px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:rgba(255,255,255,.45)}
+.bar i{width:12px;height:12px;border-radius:50%;display:block}
+.bar span{margin:0 auto;padding-right:60px}
+.code{padding:22px 26px;font:17px/1.8 var(--mono);color:#c9d1d9;white-space:pre}
+.k{color:#ff7b9c}.s{color:#a5d6ff}.f{color:#d2a8ff}.c{color:#6e7681}.n{color:#79c0ff}
+.payload{color:var(--red);background:rgba(255,93,108,.12);border-radius:4px;padding:2px 4px}
+.ln{display:inline-block;width:34px;color:rgba(255,255,255,.22);text-align:right;margin-right:22px}
+.glass{border-radius:20px;background:linear-gradient(180deg,rgba(28,32,38,.86),rgba(10,12,15,.94));backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,.14);box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.menu{position:absolute;width:560px;padding:26px;display:flex;flex-direction:column;gap:18px}
+.mrow{display:flex;align-items:center;gap:14px;font:500 20px var(--rounded)}
+.lt{font:800 13px var(--rounded);letter-spacing:2.4px;color:rgba(255,255,255,.4)}
+.badge{margin-left:auto;font:800 12px var(--rounded);letter-spacing:1.5px;padding:5px 10px;border-radius:99px}
+.term{padding:26px 30px;font:19px/1.85 var(--mono);color:rgba(255,255,255,.75);white-space:pre}
+.term b{color:var(--g2);font-weight:500}
+.block{margin-top:14px;padding:18px 22px;border-radius:12px;background:rgba(255,93,108,.1);border:1px solid rgba(255,93,108,.45);white-space:pre;font:18px/1.7 var(--mono);color:#ffd5d9}
+.notif{position:absolute;width:620px;padding:20px 22px;display:flex;gap:18px;align-items:flex-start}
+.ntitle{font:700 20px system-ui}.nbody{font:400 18px/1.45 system-ui;color:rgba(255,255,255,.72)}
+.nmeta{font:500 14px var(--rounded);color:rgba(255,255,255,.4)}
+.hist{position:absolute;width:620px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.hrow{display:flex;gap:12px;align-items:center;font:16px var(--mono);color:rgba(255,255,255,.7)}
+.sha{color:rgba(255,255,255,.4)}
+/* captions */
+#cap{position:absolute;left:120px;top:0;bottom:0;width:700px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+.kick{font:800 18px var(--rounded);letter-spacing:5px;background:linear-gradient(90deg,var(--g1),var(--g2));-webkit-background-clip:text;color:transparent}
+.head{font:700 66px/1.05 system-ui;letter-spacing:-1.6px}
+.lede{font:400 27px/1.45 system-ui;color:rgba(255,255,255,.66)}
+#title,#end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;text-align:center}
+.word{font:800 30px var(--rounded);letter-spacing:12px;color:rgba(255,255,255,.85)}
+.big{padding-bottom:.12em;font:800 124px/1 system-ui;letter-spacing:-4px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.6));-webkit-background-clip:text;color:transparent}
+.tagline{font:400 34px/1.4 system-ui;color:rgba(255,255,255,.7);max-width:1100px;text-wrap:balance}
+.chips{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.chip{font:600 20px var(--rounded);padding:10px 20px;border-radius:99px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:rgba(255,255,255,.82)}
+.cli{font:500 25px var(--mono);padding:18px 28px;border-radius:16px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+.cli b{color:var(--g2);font-weight:500}
+</style></head>
+<body><div id="stage">
+<div class="wall"></div><div class="grid"></div>
+<div id="scene"></div>
+<div id="cap"></div>
+<div id="title"></div>
+<div id="end"></div>
+</div>
+<script>
+// ---- helpers ----
+const cl=x=>Math.max(0,Math.min(1,x)), seg=(t,a,b)=>cl((t-a)/(b-a)), ease=x=>1-Math.pow(1-x,3), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const lerp=(a,b,k)=>a+(b-a)*k;
+const LOGO=(s)=>`<svg width="${s}" height="${s}" viewBox="0 0 256 256"><defs><linearGradient id="g${s}" gradientUnits="userSpaceOnUse" x1="42" y1="18" x2="214" y2="238"><stop offset="0" stop-color="#5EE6FF"/><stop offset="1" stop-color="#3FD98A"/></linearGradient></defs><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M128 18 214 50v70c0 58-37 99-86 118C79 219 42 178 42 120V50z" stroke="url(#g${s})" stroke-width="16"/><path d="M128 92v20M128 144v20" stroke="url(#g${s})" stroke-width="11"/><circle cx="128" cy="76" r="15" stroke="url(#g${s})" stroke-width="10"/><circle cx="128" cy="128" r="15" stroke="url(#g${s})" stroke-width="10"/><circle cx="128" cy="180" r="17" fill="url(#g${s})" stroke="none"/><path d="M143 128c18 0 27-6 33-16" stroke="#FF5D6C" stroke-width="10"/><path d="M178 86l16 16M194 86l-16 16" stroke="#FF5D6C" stroke-width="9"/></g></svg>`;
+const ICON={check:'M20 6 9 17l-5-5',x:'M18 6 6 18M6 6l12 12',warn:'M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'};
+const ic=(n,s,c)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="${ICON[n]}"/></svg>`;
+const statusDot=(c,s=14)=>`<span style="width:${s}px;height:${s}px;border-radius:50%;background:${c};box-shadow:0 0 14px ${c};flex:none;display:inline-block"></span>`;
+
+// The demo "payload": assembled at runtime, never present as a literal in this file.
+let seed=7;const G='glo'+'bal', HX=()=>'_0'+'x'+(0x1a2b3+(seed=seed*48271%2147483647)%0xe0000).toString(16);
+let PAY=null;
+function payload(){ if(PAY) return PAY;
+  let s=`;${G}[${"'_"+"V'"}]='8-st31';${G}[${"'r'"}]=require;(function(){var `;
+  for(let i=0;i<9;i++) s+=`${HX()}=${HX()}(0x${(i*977+311).toString(16)}),`;
+  return PAY=s+`...`;
+}
+
+// ---- scenes ----
+function threat(t){
+  const k=ease(seg(t,3.1,3.8))*(1-ease(seg(t,7.7,8.1)));
+  const scroll=eio(seg(t,4.6,6.6));               // camera pans right along the long line
+  const lines=[
+    `<span class="k">import</span> forms <span class="k">from</span> <span class="s">"@tailwindcss/forms"</span>;`,
+    ``,
+    `<span class="c">/** @type {import('tailwindcss').Config} */</span>`,
+    `<span class="k">const</span> config = {`,
+    `  content: [<span class="s">"./src/**/*.{ts,tsx}"</span>],`,
+    `  theme: { extend: { colors: { brand: <span class="s">"#5EE6FF"</span> } } },`,
+    `  plugins: [forms],`,
+    `};`,
+    ``,
+    `<span class="k">export default</span> config;`+' '.repeat(140)+`<span class="payload">${payload()}</span>`,
+  ];
+  const html=lines.map((l,i)=>`<div><span class="ln">${i+1}</span>${l}</div>`).join('');
+  const flag=seg(t,6.4,6.9);
+  return `<div class="win" style="left:880px;top:190px;width:940px;height:600px;opacity:${k};transform:translateY(${30*(1-k)}px)">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>tailwind.config.js — acme-web</span></div>
+    <div class="code" style="transform:translateX(${-1500*scroll}px)">${html}</div>
+    <div style="position:absolute;left:0;top:${40+22+9*30.6+4}px;width:236px;height:28px;opacity:${seg(t,6.2,6.6)};display:flex;align-items:center">
+      <div style="flex:1;border-top:2px dashed rgba(255,193,77,.8)"></div></div>
+    <div style="position:absolute;left:18px;top:${40+22+8*30.6}px;font:700 15px var(--rounded);letter-spacing:1px;color:#FFC24D;opacity:${seg(t,6.2,6.6)}">&larr; 140 SPACES OF PADDING</div>
+    <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 26px;background:linear-gradient(180deg,transparent,rgba(255,93,108,.18));font:600 17px var(--rounded);color:var(--red);display:flex;gap:10px;align-items:center;opacity:${flag}">${ic('warn',20,'#FF5D6C')}Line 10, column 163: obfuscated code appended after the export</div>
+  </div>`;
+}
+const LAYERS=['Block npm install scripts','DNS-block C2 servers','Git pre-commit hook','Hourly force-push detector','Daily malware scan'];
+function layers(t){
+  const k=ease(seg(t,8.1,8.7))*(1-ease(seg(t,12.4,12.8)));
+  const on=LAYERS.map((_,i)=>seg(t,9+i*.45,9.25+i*.45));
+  const all=on.every(x=>x>=1), st=all?'#3FD98A':'#FFC24D';
+  const rows=LAYERS.map((n,i)=>`<div class="mrow" style="opacity:${.45+.55*on[i]}">${on[i]>=1?ic('check',22,'#3FD98A'):ic('x',22,'rgba(255,255,255,.35)')}${n}
+    <span class="badge" style="opacity:${on[i]};transform:scale(${.8+.2*on[i]});color:#3FD98A;background:rgba(63,217,138,.13)">ACTIVE</span></div>`).join('');
+  return `<div class="glass menu" style="left:1080px;top:190px;opacity:${k};transform:translateY(${30*(1-k)}px) scale(${.96+.04*k})">
+    <div class="mrow" style="gap:14px">${LOGO(44)}<div><div style="font:700 24px system-ui">PolinShield</div>
+      <div style="font:500 16px var(--rounded);color:${st}">${all?'All defenses active':'Setting up defenses…'}</div></div><span style="margin-left:auto">${statusDot(st,16)}</span></div>
+    <div class="lt">DEFENSES</div>${rows}
+    <div class="lt" style="margin-top:4px">LAST SCAN</div>
+    <div class="mrow" style="color:rgba(255,255,255,.75)">${ic('check',22,'#3FD98A')}Clean · 0 indicators · just now</div></div>`;
+}
+function hook(t){
+  const k=ease(seg(t,12.7,13.3))*(1-ease(seg(t,16.9,17.3)));
+  const cmd='git commit -am "bump tailwind"', n=Math.round(cmd.length*seg(t,13.5,14.6));
+  const blocked=seg(t,14.9,15.3);
+  return `<div class="win" style="left:880px;top:230px;width:940px;height:520px;opacity:${k};transform:translateY(${30*(1-k)}px)">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span>acme-web — zsh</span></div>
+    <div class="term"><b>~/acme-web</b> $ ${cmd.slice(0,n)}${n<cmd.length||t%1<.5?'▍':''}</div>
+    <div style="padding:0 30px;opacity:${blocked};transform:translateY(${12*(1-blocked)}px)"><div class="block"><span style="color:#FF5D6C;font-weight:700">✗ PolinShield blocked this commit</span>
+  tailwind.config.js:10  obfuscated payload after export
+  .env                   staged secrets file
+
+<span style="color:rgba(255,255,255,.5)">Nothing was pushed. Clean the file, then commit again.</span></div></div></div>`;
+}
+function alert(t){
+  const k=ease(seg(t,17.6,18.1))*(1-ease(seg(t,21.1,21.5)));
+  const h=ease(seg(t,18.5,19.1))*(1-ease(seg(t,21.1,21.5)));
+  return `<div class="glass notif" style="left:1180px;top:110px;opacity:${k};transform:translateX(${420*(1-k)}px)">
+      ${LOGO(54)}<div style="flex:1;display:flex;flex-direction:column;gap:6px"><div class="row" style="display:flex"><span class="ntitle">GitHub Force-Push Alert</span><span class="nmeta" style="margin-left:auto">now</span></div>
+      <div class="nbody">acme/web → <b style="color:#fff">main</b>, acme/api → <b style="color:#fff">staging</b><br>History was rewritten in the last hour.</div></div></div>
+    <div class="glass hist" style="left:1180px;top:330px;opacity:${h};transform:translateY(${24*(1-h)}px)">
+      <div class="lt">FORCE-PUSH HISTORY</div>
+      <div class="hrow">${statusDot('#FF5D6C',10)}acme/web<span class="sha">/main</span><span style="margin-left:auto" class="sha">9f2c1e4 → 3ab07d1</span></div>
+      <div class="hrow">${statusDot('#FF5D6C',10)}acme/api<span class="sha">/staging</span><span style="margin-left:auto" class="sha">c41d9a0 → 77e2b5f</span></div>
+      <div class="hrow" style="opacity:.55">${statusDot('#3FD98A',10)}acme/docs<span class="sha">/main</span><span style="margin-left:auto" class="sha">fast-forward · ok</span></div>
+      <div style="font:500 15px var(--rounded);color:rgba(255,255,255,.45);margin-top:4px">Checked against GitHub's compare API · read-only</div></div>`;
+}
+
+const CAPS=[
+  [3.1,7.9,'THE THREAT','Malware hides<br>off-screen','PolinRider appends obfuscated code to ordinary config files, behind hundreds of spaces where nobody scrolls.'],
+  [8.1,12.6,'FIVE LAYERS','One click,<br>five defenses','Install scripts off, attacker domains blocked, a pre-commit hook, hourly force-push checks and a daily scan.'],
+  [12.7,17.1,'PRE-COMMIT HOOK','Infected files never<br>leave your machine','Indicators and staged secrets are caught before they reach a remote, even if every other layer missed them.'],
+  [17.6,21.3,'FORCE-PUSH WATCH','Know within<br>the hour','The worm spreads by rewriting history. PolinShield checks every push against GitHub and names the repo.'],
+];
+
+const D=26;
+function render(t){
+  document.getElementById('scene').innerHTML=threat(t)+layers(t)+hook(t)+alert(t);
+  const cap=CAPS.find(c=>t>=c[0]-.01&&t<c[1]), capEl=document.getElementById('cap');
+  if(cap){const k=Math.min(ease(seg(t,cap[0],cap[0]+.5)),1-seg(t,cap[1]-.35,cap[1]));
+    capEl.innerHTML=`<div class="kick">${cap[2]}</div><div class="head">${cap[3]}</div><div class="lede">${cap[4]}</div>`;
+    capEl.style.opacity=k;capEl.style.transform=`translateY(${18*(1-k)}px)`}else capEl.innerHTML='';
+  const titleK=1-seg(t,2.4,3.0), endK=seg(t,21.6,22.3);
+  const T=document.getElementById('title');T.style.opacity=titleK;T.style.transform=`scale(${1+.04*(1-titleK)})`;
+  const pop=ease(seg(t,0,.8));
+  T.innerHTML=titleK>0?`<div style="transform:scale(${.85+.15*pop});opacity:${pop};filter:drop-shadow(0 18px 50px rgba(94,230,255,.35))">${LOGO(170)}</div>
+    <div class="word">POLINSHIELD</div><div class="big">Supply-chain malware<br>stops here.</div>
+    <div class="tagline">A native macOS menu bar app that guards your dev machine against npm worms like PolinRider.</div>`:'';
+  const E=document.getElementById('end');E.style.opacity=endK;
+  E.innerHTML=endK>0?`<div style="filter:drop-shadow(0 18px 50px rgba(63,217,138,.35))">${LOGO(130)}</div><div class="word">POLINSHIELD</div>
+    <div class="big" style="font-size:96px">Five layers.<br>Zero trust required.</div>
+    <div class="chips"><span class="chip">Native SwiftUI</span><span class="chip">Auditable bash</span><span class="chip">No telemetry</span><span class="chip">MIT licensed</span></div>
+    <div class="cli"><b>$</b> git clone https://github.com/Louayzouaoui1/polinshield && cd polinshield && make install</div>`:'';
+}
+const q=new URLSearchParams(location.search);render(+(q.get('t')??1.5));
+</script></body></html>
