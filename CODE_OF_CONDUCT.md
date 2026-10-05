@@ -10,7 +10,7 @@ This project adopts the [Contributor Covenant 2.1](https://www.contributor-coven
 
 ## Reporting
 
-If someone is being harmful in this project's spaces, contact the maintainer (see the GitHub profile of [@Louay24](https://github.com/Louay24) for current contact info). Reports are handled confidentially.
+If someone is being harmful in this project's spaces, contact the maintainer (see the GitHub profile of [@Louayzouaoui1](https://github.com/Louayzouaoui1) for current contact info). Reports are handled confidentially.
 
 ## Enforcement
 

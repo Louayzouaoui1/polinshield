@@ -1,11 +1,11 @@
 cask "polinshield" do
   version "1.0.0"
-  sha256 "REPLACE_WITH_RELEASE_SHA256"
+  sha256 "d9a8af9b3fbdf21e7edc4a2ceda4388cb8c66b4ab6d9755b102197ebad470d96"
 
-  url "https://github.com/Louay24/polinshield/releases/download/v#{version}/PolinShield-#{version}.dmg"
+  url "https://github.com/Louayzouaoui1/polinshield/releases/download/v#{version}/PolinShield-#{version}.dmg"
   name "PolinShield"
   desc "Menu bar defense against npm supply-chain malware"
-  homepage "https://github.com/Louay24/polinshield"
+  homepage "https://github.com/Louayzouaoui1/polinshield"
 
   app "PolinShield.app"
 

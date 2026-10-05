@@ -37,4 +37,4 @@ Initial public release.
 - `.vscode/tasks.json` `curl | bash` pattern detection not yet implemented — issue tracked.
 - Fake `.woff2` font payload detection not yet implemented — issue tracked.
 
-[1.0.0]: https://github.com/Louay24/polinshield/releases/tag/v1.0.0
+[1.0.0]: https://github.com/Louayzouaoui1/polinshield/releases/tag/v1.0.0

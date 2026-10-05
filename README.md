@@ -7,14 +7,14 @@
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-007AFF?logo=apple)](https://www.apple.com/macos)
 [![Swift 6](https://img.shields.io/badge/Swift-6-FA7343?logo=swift)](https://swift.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Louay24/polinshield?include_prereleases)](https://github.com/Louay24/polinshield/releases)
-[![Build](https://github.com/Louay24/polinshield/actions/workflows/build.yml/badge.svg)](https://github.com/Louay24/polinshield/actions/workflows/build.yml)
+[![Release](https://img.shields.io/github/v/release/Louayzouaoui1/polinshield?include_prereleases)](https://github.com/Louayzouaoui1/polinshield/releases)
+[![Build](https://github.com/Louayzouaoui1/polinshield/actions/workflows/build.yml/badge.svg)](https://github.com/Louayzouaoui1/polinshield/actions/workflows/build.yml)
 
 [Install](#install) ·
 [How it works](#how-it-works) ·
 [The threat](docs/THREAT.md) ·
 [Architecture](docs/ARCHITECTURE.md) ·
-[Website](https://louay24.github.io/polinshield)
+[Website](https://louayzouaoui1.github.io/polinshield)
 
 </div>
 
@@ -49,17 +49,17 @@ PolinShield blocks this attack pattern at five independent layers, so even if on
 ### Homebrew
 
 ```bash
-brew install --cask louay24/tap/polinshield
+brew install --cask louayzouaoui1/tap/polinshield
 ```
 
 ### Direct download
 
-[**↓ Latest Release (.dmg)**](https://github.com/Louay24/polinshield/releases/latest)
+[**↓ Latest Release (.dmg)**](https://github.com/Louayzouaoui1/polinshield/releases/latest)
 
 ### Build from source
 
 ```bash
-git clone https://github.com/Louay24/polinshield.git
+git clone https://github.com/Louayzouaoui1/polinshield.git
 cd polinshield
 make install     # builds, signs, installs to /Applications
 ```
@@ -115,13 +115,13 @@ The Swift binary is ~400 KB. The full source is ~700 lines of Swift + ~250 lines
 
 - **`ignore-scripts=true` breaks packages that need install scripts** (`sharp`, `node-canvas`, native bindings). To install those: `npm install --foreground-scripts <pkg>` after auditing.
 - **Force-push detection requires the GitHub CLI** authenticated as your user (`brew install gh && gh auth login`). Without it, layer 4 is silent.
-- **Ad-hoc signed.** First launch on each Mac may need a right-click → Open to bypass Gatekeeper. We don't have an Apple Developer ID. If you'd like to donate one, [open an issue](https://github.com/Louay24/polinshield/issues).
+- **Ad-hoc signed.** First launch on each Mac may need a right-click → Open to bypass Gatekeeper. We don't have an Apple Developer ID. If you'd like to donate one, [open an issue](https://github.com/Louayzouaoui1/polinshield/issues).
 
 ## FAQ
 
 ### Is the malware still active in the wild?
 
-Yes — and growing. As of the most recent OSM dossier update (April 2026), the campaign is **doubling every ~5 weeks**. New variants and C2 domains are appearing regularly. PolinShield's IOC list is updated as new ones are reported — see [issues](https://github.com/Louay24/polinshield/issues) and the [OSM canonical dossier](https://github.com/OpenSourceMalware/PolinRider).
+Yes — and growing. As of the most recent OSM dossier update (April 2026), the campaign is **doubling every ~5 weeks**. New variants and C2 domains are appearing regularly. PolinShield's IOC list is updated as new ones are reported — see [issues](https://github.com/Louayzouaoui1/polinshield/issues) and the [OSM canonical dossier](https://github.com/OpenSourceMalware/PolinRider).
 
 ### Why a menu bar app and not a CLI?
 
@@ -145,7 +145,7 @@ PolinShield is **v1.0.0**. The defenses are battle-tested (I built this after my
 
 ## Credits
 
-- Built by [@Louay24](https://github.com/Louay24) after a confirmed PolinRider infection in May 2026.
+- Built by [@Louayzouaoui1](https://github.com/Louayzouaoui1) after a confirmed PolinRider infection in May 2026.
 - The threat dossier and IOC research is the work of the **[OpenSourceMalware](https://github.com/OpenSourceMalware/PolinRider)** team — please support their work, follow their feed, and report new variants there.
 - Inspired by realizing that the npm install-script attack surface is the modern equivalent of running random `.exe` files from email.
 
@@ -159,6 +159,6 @@ PolinShield is **v1.0.0**. The defenses are battle-tested (I built this after my
 
 **Found PolinShield useful? Star ⭐ this repo so other developers find it.**
 
-[Report an issue](https://github.com/Louay24/polinshield/issues) · [Suggest an IOC](https://github.com/Louay24/polinshield/issues/new) · [Read the threat writeup](docs/THREAT.md)
+[Report an issue](https://github.com/Louayzouaoui1/polinshield/issues) · [Suggest an IOC](https://github.com/Louayzouaoui1/polinshield/issues/new) · [Read the threat writeup](docs/THREAT.md)
 
 </div>

@@ -1,5 +1,5 @@
 // PolinShield — Menu bar defense against npm supply-chain malware
-// https://github.com/Louay24/polinshield
+// https://github.com/Louayzouaoui1/polinshield
 import SwiftUI
 import AppKit
 import UserNotifications

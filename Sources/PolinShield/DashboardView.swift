@@ -375,9 +375,9 @@ struct AboutPane: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 40)
             HStack(spacing: 16) {
-                Link("GitHub", destination: URL(string: "https://github.com/Louay24/polinshield")!)
-                Link("Report Issue", destination: URL(string: "https://github.com/Louay24/polinshield/issues")!)
-                Link("Documentation", destination: URL(string: "https://github.com/Louay24/polinshield/blob/main/README.md")!)
+                Link("GitHub", destination: URL(string: "https://github.com/Louayzouaoui1/polinshield")!)
+                Link("Report Issue", destination: URL(string: "https://github.com/Louayzouaoui1/polinshield/issues")!)
+                Link("Documentation", destination: URL(string: "https://github.com/Louayzouaoui1/polinshield/blob/main/README.md")!)
             }
             Spacer()
             Text("MIT License · Built after the 2026 PolinRider/openclaw incident")

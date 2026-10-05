@@ -5,7 +5,7 @@
 If you discover a security vulnerability in PolinShield, please **do not open a public issue**. Instead:
 
 1. Email **security reports** to the maintainer (see GitHub profile for current contact)
-2. Or use [GitHub's private vulnerability reporting](https://github.com/Louay24/polinshield/security/advisories/new)
+2. Or use [GitHub's private vulnerability reporting](https://github.com/Louayzouaoui1/polinshield/security/advisories/new)
 
 Please include:
 - A description of the issue

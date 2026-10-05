@@ -39,7 +39,7 @@ jobs:
 
             ### Install
             ```bash
-            brew install --cask louay24/tap/polinshield
+            brew install --cask louayzouaoui1/tap/polinshield
             ```
 
             Or download the DMG below and drag to /Applications.

@@ -120,7 +120,7 @@ The malware modifies `.gitignore` to:
 | `vscode-bootstrapper.vercel.app` | tasks.json C2 |
 | `vscode-load-config.vercel.app` | tasks.json C2 |
 
-PolinShield's Layer 2 (`/etc/hosts` block) covers `auth-con-firm` and `auth-rho-dun`. Adding the others is on the [roadmap](https://github.com/Louay24/polinshield/issues).
+PolinShield's Layer 2 (`/etc/hosts` block) covers `auth-con-firm` and `auth-rho-dun`. Adding the others is on the [roadmap](https://github.com/Louayzouaoui1/polinshield/issues).
 
 ### Process pattern
 
@@ -237,4 +237,4 @@ If you find:
 - A new injection vector
 - A new fake-interview template
 
-…please [open an issue](https://github.com/Louay24/polinshield/issues/new) on PolinShield and submit it to the [OSM PolinRider repo](https://github.com/OpenSourceMalware/PolinRider/issues). Confirmed reports get added to the bash defenses in the next PolinShield release.
+…please [open an issue](https://github.com/Louayzouaoui1/polinshield/issues/new) on PolinShield and submit it to the [OSM PolinRider repo](https://github.com/OpenSourceMalware/PolinRider/issues). Confirmed reports get added to the bash defenses in the next PolinShield release.

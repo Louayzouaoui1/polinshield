@@ -13,14 +13,14 @@ PolinShield is **400 KB** and uses **no background daemons** other than two user
 ## Option 1 — Homebrew (recommended)
 
 ```bash
-brew install --cask louay24/tap/polinshield
+brew install --cask louayzouaoui1/tap/polinshield
 ```
 
 Then launch PolinShield from Spotlight or `/Applications`.
 
 ## Option 2 — Download DMG
 
-1. Go to [Releases](https://github.com/Louay24/polinshield/releases/latest).
+1. Go to [Releases](https://github.com/Louayzouaoui1/polinshield/releases/latest).
 2. Download `PolinShield-X.Y.Z.dmg`.
 3. Open the DMG, drag **PolinShield** to your **Applications** folder.
 4. Launch PolinShield from `/Applications` or Spotlight.
@@ -42,7 +42,7 @@ If you have **System Settings → Privacy & Security** open, you'll also see an 
 ## Option 3 — Build from source
 
 ```bash
-git clone https://github.com/Louay24/polinshield.git
+git clone https://github.com/Louayzouaoui1/polinshield.git
 cd polinshield
 make install      # builds, signs, and installs to /Applications
 ```

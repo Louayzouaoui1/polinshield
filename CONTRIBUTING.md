@@ -5,7 +5,7 @@ Thanks for considering a contribution. PolinShield is a small, focused tool — 
 ## Quick start
 
 ```bash
-git clone https://github.com/Louay24/polinshield.git
+git clone https://github.com/Louayzouaoui1/polinshield.git
 cd polinshield
 make app           # builds .build/PolinShield.app
 open .build/PolinShield.app
@@ -20,7 +20,7 @@ You'll need:
 
 ### 🐛 Reporting a new IOC
 
-This is the most useful contribution. If you spot a new variant of PolinRider/openclaw or a similar attack, [open an issue](https://github.com/Louay24/polinshield/issues/new) with:
+This is the most useful contribution. If you spot a new variant of PolinRider/openclaw or a similar attack, [open an issue](https://github.com/Louayzouaoui1/polinshield/issues/new) with:
 
 - The IOC string / domain / file path you found
 - Where you found it (anonymized if needed)
