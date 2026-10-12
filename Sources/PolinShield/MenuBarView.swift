@@ -22,6 +22,23 @@ struct MenuBarView: View {
             }
             .padding(12)
 
+            if !engine.liveAlerts.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("LIVE ALERTS")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                    ForEach(engine.liveAlerts.prefix(4)) { alert in
+                        Text(alert.text)
+                            .font(.system(size: 11))
+                            .lineLimit(2)
+                    }
+                    Button("Dismiss all") { engine.clearAlerts() }
+                        .buttonStyle(.link)
+                        .font(.caption)
+                }
+                .padding(12)
+            }
+
             Divider()
 
             // Defenses
@@ -96,6 +113,20 @@ struct MenuBarView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(engine.isScanning)
+
+                Button {
+                    Task { await engine.auditCredentials() }
+                } label: {
+                    HStack {
+                        Image(systemName: "key.viewfinder")
+                        Text("Audit GitHub Credentials")
+                        Spacer()
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
 
                 Button {
                     openWindow(id: "dashboard")

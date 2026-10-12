@@ -14,10 +14,17 @@ class DefenseEngine: ObservableObject {
     @Published var lastScanDate: Date?
 
     private var scanTimer: Timer?
+    private var compromiseTimer: Timer?
+    private var watcher: LiveFileWatcher?
+
+    /// Findings from the live watcher, the stolen-credential check and the credential audit.
+    @Published var liveAlerts: [LiveAlert] = []
+    @Published var credentialAudit: String = ""
 
     enum OverallStatus { case clean, warning, infected, unknown }
 
     var overallStatus: OverallStatus {
+        if !liveAlerts.isEmpty { return .infected }
         if defenses.contains(where: { !$0.installed }) { return .warning }
         if let last = scanHistory.first, last.foundIndicators.isEmpty == false { return .infected }
         if scanHistory.isEmpty { return .unknown }
@@ -55,6 +62,43 @@ class DefenseEngine: ObservableObject {
         loadHistory()
         loadForcePushHistory()
         startScanTimer()
+        startLiveProtection()
+    }
+
+    // MARK: - Live protection
+
+    func startLiveProtection() {
+        let desktop = NSString(string: "~/Desktop").expandingTildeInPath
+        watcher = LiveFileWatcher(roots: [desktop]) { [weak self] finding in
+            Task { @MainActor in self?.addAlert(source: "Live file watcher", text: finding) }
+        }
+        watcher?.start()
+        compromiseTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+            Task { await self?.checkAccountCompromise() }
+        }
+        Task { await checkAccountCompromise(); await auditCredentials() }
+    }
+
+    func addAlert(source: String, text: String) {
+        guard !liveAlerts.contains(where: { $0.text == text }) else { return }
+        liveAlerts.insert(LiveAlert(date: Date(), source: source, text: text), at: 0)
+        if liveAlerts.count > 50 { liveAlerts.removeLast() }
+        sendNotification(title: "🚨 PolinShield: \(source)", body: text)
+    }
+
+    func clearAlerts() { liveAlerts.removeAll() }
+
+    func checkAccountCompromise() async {
+        guard let path = scriptPath("check-account-compromise") else { return }
+        let r = await runShell("/bin/bash", args: [path])
+        for line in parseIndicators(r.output) { addAlert(source: "Stolen credentials?", text: line) }
+    }
+
+    func auditCredentials() async {
+        guard let path = scriptPath("audit-credentials") else { return }
+        let r = await runShell("/bin/bash", args: [path])
+        credentialAudit = r.output
+        for line in parseIndicators(r.output) { addAlert(source: "Credential audit", text: line) }
     }
 
     func startScanTimer() {
@@ -321,6 +365,13 @@ struct ScanResult: Codable, Identifiable, Equatable {
     let foundIndicators: [String]
     let log: String
     var clean: Bool { foundIndicators.isEmpty }
+}
+
+struct LiveAlert: Identifiable, Equatable {
+    let id = UUID()
+    let date: Date
+    let source: String
+    let text: String
 }
 
 struct ForcePushEvent: Codable, Identifiable, Equatable {

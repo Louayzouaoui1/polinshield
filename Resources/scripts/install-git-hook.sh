@@ -51,5 +51,18 @@ if [ "$FOUND" = "1" ]; then
 fi
 HOOK
 chmod +x "$HOME/.git-hooks/pre-commit"
+
+cat > "$HOME/.git-hooks/pre-push" <<'HOOK'
+#!/usr/bin/env bash
+# PolinShield pre-push: record what THIS Mac pushes, so pushes made elsewhere with a
+# stolen token can be recognised (see check-account-compromise.sh).
+DIR="$HOME/Library/Application Support/PolinShield"; mkdir -p "$DIR"
+while read -r lref lsha rref rsha; do
+  [ "$lsha" = "0000000000000000000000000000000000000000" ] && continue
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $2 $rref $lsha" >> "$DIR/push-ledger.log"
+done
+exit 0
+HOOK
+chmod +x "$HOME/.git-hooks/pre-push"
 git config --global core.hooksPath "$HOME/.git-hooks"
-echo "✓ Global pre-commit hook installed"
+echo "✓ Global pre-commit and pre-push hooks installed"
