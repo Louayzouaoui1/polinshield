@@ -75,8 +75,8 @@ class DefenseEngine: ObservableObject {
 
     func startLiveProtection() {
         let desktop = NSString(string: "~/Desktop").expandingTildeInPath
-        watcher = LiveFileWatcher(roots: [desktop]) { [weak self] finding in
-            Task { @MainActor in self?.addAlert(source: "Live file watcher", text: finding) }
+        watcher = LiveFileWatcher(roots: [desktop]) { [weak self] finding, path in
+            Task { @MainActor in self?.addAlert(source: "Live file watcher", text: finding, path: path) }
         }
         watcher?.start()
         compromiseTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
@@ -85,12 +85,13 @@ class DefenseEngine: ObservableObject {
         Task { await checkAccountCompromise(); await auditCredentials() }
     }
 
-    func addAlert(source: String, text: String) {
-        guard !liveAlerts.contains(where: { $0.text == text }) else { return }
-        liveAlerts.insert(LiveAlert(date: Date(), source: source, text: text), at: 0)
+    func addAlert(source: String, text: String, path: String? = nil) {
+        guard !liveAlerts.contains(where: { $0.text == text && $0.path == path }) else { return }
+        liveAlerts.insert(LiveAlert(date: Date(), source: source, text: text, path: path), at: 0)
         if liveAlerts.count > 50 { liveAlerts.removeLast() }
         let cleaned = liveAlerts.first?.cleaned ?? false
-        sendNotification(title: cleaned ? "PolinShield: threat removed" : "🚨 PolinShield: \(source)", body: text)
+        sendNotification(title: cleaned ? "PolinShield: threat removed" : "🚨 PolinShield: \(source)",
+                         body: path.map { "\(text)\n\(($0 as NSString).lastPathComponent)" } ?? text)
     }
 
     func clearAlerts() { liveAlerts.removeAll() }
@@ -108,7 +109,9 @@ class DefenseEngine: ObservableObject {
         let r = await runShell("/bin/bash", args: [path])
         credentialAudit = r.output
         lastAuditDate = Date()
-        for line in parseIndicators(r.output) { addAlert(source: "Credential audit", text: line) }
+        for item in AuditItem.parse(r.output) where item.status == "bad" {
+            addAlert(source: "Credential audit", text: "🚨 " + item.text)
+        }
     }
 
     func startScanTimer() {
@@ -377,11 +380,27 @@ struct ScanResult: Codable, Identifiable, Equatable {
     var clean: Bool { foundIndicators.isEmpty }
 }
 
+/// One line of audit-credentials.sh output: STATUS|text|url
+struct AuditItem: Identifiable {
+    let id = UUID()
+    let status: String
+    let text: String
+    let url: URL?
+    static func parse(_ output: String) -> [AuditItem] {
+        output.split(separator: "\n").compactMap { line in
+            let p = line.split(separator: "|", maxSplits: 2, omittingEmptySubsequences: false).map(String.init)
+            guard p.count == 3, ["bad", "warn", "ok", "todo"].contains(p[0]) else { return nil }
+            return AuditItem(status: p[0], text: p[1], url: URL(string: p[2]))
+        }
+    }
+}
+
 struct LiveAlert: Identifiable, Equatable {
     let id = UUID()
     let date: Date
     let source: String
     let text: String
+    let path: String?
     /// True when the watcher already removed the threat (quarantined or cut out); false means you must act.
     var cleaned: Bool { text.contains("quarantined") || text.contains("removed from") }
 }

@@ -6,11 +6,11 @@ import CoreServices
 final class LiveFileWatcher {
     private var stream: FSEventStreamRef?
     private let queue = DispatchQueue(label: "dev.polinshield.watcher", qos: .utility)
-    private let onFinding: (String) -> Void
+    private let onFinding: (String, String) -> Void
     private let roots: [String]
     private var lastSeen: [String: Date] = [:]
 
-    init(roots: [String], onFinding: @escaping (String) -> Void) {
+    init(roots: [String], onFinding: @escaping (String, String) -> Void) {
         self.roots = roots
         self.onFinding = onFinding
     }
@@ -49,7 +49,7 @@ final class LiveFileWatcher {
         if let t = lastSeen[path], now.timeIntervalSince(t) < 5 { return }
         lastSeen[path] = now
         if lastSeen.count > 5000 { lastSeen = lastSeen.filter { now.timeIntervalSince($0.value) < 5 } }
-        for finding in Self.checkAndClean(path: path) { onFinding(finding) }
+        for finding in Self.checkAndClean(path: path) { onFinding(finding, path) }
     }
 
     // MARK: - Checks (same rules as scan-malware.sh and the org guard)
@@ -75,14 +75,14 @@ final class LiveFileWatcher {
                                       .padded: "padded obfuscated payload", .marker: "malware marker"]
         let what = kinds.compactMap { labels[$0] }.sorted().joined(separator: ", ")
         guard let backup = saveToQuarantine(path: path, data: data) else {
-            return ["🚨 \(what) in \(path), COULD NOT quarantine: remove it by hand"]
+            return ["🚨 \(what) found, COULD NOT quarantine: remove it by hand"]
         }
         let fm = FileManager.default
         if kinds.contains(.fakeFont) || kinds.contains(.launcher) {
             try? fm.removeItem(atPath: path)
-            return ["🚨 \(what) quarantined: \(path)"]
+            return ["🚨 \(what) quarantined"]
         }
-        guard let text else { return ["🚨 \(what) in \(path), original saved to \(backup)"] }
+        guard let text else { return ["🚨 \(what) found, not auto-cleaned (backup saved in Quarantine)"] }
         var lines = text.components(separatedBy: "\n")
         for (n, line) in lines.enumerated() {
             let r = NSRange(line.startIndex..., in: line)
@@ -98,10 +98,10 @@ final class LiveFileWatcher {
         }
         let cleaned = lines.joined(separator: "\n")
         guard cleaned != text, let out = cleaned.data(using: .isoLatin1) else {
-            return ["🚨 \(what) in \(path), not auto-cleaned (original untouched; copy in \(backup))"]
+            return ["🚨 \(what) found, not auto-cleaned (original untouched; backup in Quarantine)"]
         }
-        do { try out.write(to: URL(fileURLWithPath: path)) } catch { return ["🚨 \(what) in \(path), clean failed: \(error.localizedDescription)"] }
-        return ["🚨 \(what) removed from \(path) (original in quarantine)"]
+        do { try out.write(to: URL(fileURLWithPath: path)) } catch { return ["🚨 \(what) found, clean failed: \(error.localizedDescription)"] }
+        return ["🚨 \(what) removed from file (original in Quarantine)"]
     }
 
     private static func saveToQuarantine(path: String, data: Data) -> String? {
