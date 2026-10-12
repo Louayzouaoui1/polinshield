@@ -20,11 +20,14 @@ class DefenseEngine: ObservableObject {
     /// Findings from the live watcher, the stolen-credential check and the credential audit.
     @Published var liveAlerts: [LiveAlert] = []
     @Published var credentialAudit: String = ""
+    @Published var isAuditing = false
+    @Published var lastAuditDate: Date?
 
-    enum OverallStatus { case clean, warning, infected, unknown }
+    enum OverallStatus { case clean, warning, infected, remediated, unknown }
 
     var overallStatus: OverallStatus {
-        if !liveAlerts.isEmpty { return .infected }
+        if liveAlerts.contains(where: { !$0.cleaned }) { return .infected }
+        if !liveAlerts.isEmpty { return .remediated }
         if defenses.contains(where: { !$0.installed }) { return .warning }
         if let last = scanHistory.first, last.foundIndicators.isEmpty == false { return .infected }
         if scanHistory.isEmpty { return .unknown }
@@ -36,6 +39,7 @@ class DefenseEngine: ObservableObject {
         case .clean: return "checkmark.shield.fill"
         case .warning: return "exclamationmark.shield.fill"
         case .infected: return "xmark.shield.fill"
+        case .remediated: return "checkmark.shield.fill"
         case .unknown: return "shield"
         }
     }
@@ -45,6 +49,7 @@ class DefenseEngine: ObservableObject {
         case .clean: return .green
         case .warning: return .yellow
         case .infected: return .red
+        case .remediated: return .orange
         case .unknown: return .secondary
         }
     }
@@ -53,7 +58,8 @@ class DefenseEngine: ObservableObject {
         switch overallStatus {
         case .clean: return "Protected"
         case .warning: return "Defenses incomplete"
-        case .infected: return "Infection detected"
+        case .infected: return "Infection detected, action needed"
+        case .remediated: return "Threat found and removed (\(liveAlerts.count))"
         case .unknown: return "No scan yet"
         }
     }
@@ -83,7 +89,8 @@ class DefenseEngine: ObservableObject {
         guard !liveAlerts.contains(where: { $0.text == text }) else { return }
         liveAlerts.insert(LiveAlert(date: Date(), source: source, text: text), at: 0)
         if liveAlerts.count > 50 { liveAlerts.removeLast() }
-        sendNotification(title: "🚨 PolinShield: \(source)", body: text)
+        let cleaned = liveAlerts.first?.cleaned ?? false
+        sendNotification(title: cleaned ? "PolinShield: threat removed" : "🚨 PolinShield: \(source)", body: text)
     }
 
     func clearAlerts() { liveAlerts.removeAll() }
@@ -96,8 +103,11 @@ class DefenseEngine: ObservableObject {
 
     func auditCredentials() async {
         guard let path = scriptPath("audit-credentials") else { return }
+        isAuditing = true
+        defer { isAuditing = false }
         let r = await runShell("/bin/bash", args: [path])
         credentialAudit = r.output
+        lastAuditDate = Date()
         for line in parseIndicators(r.output) { addAlert(source: "Credential audit", text: line) }
     }
 
@@ -372,6 +382,8 @@ struct LiveAlert: Identifiable, Equatable {
     let date: Date
     let source: String
     let text: String
+    /// True when the watcher already removed the threat (quarantined or cut out); false means you must act.
+    var cleaned: Bool { text.contains("quarantined") || text.contains("removed from") }
 }
 
 struct ForcePushEvent: Codable, Identifiable, Equatable {

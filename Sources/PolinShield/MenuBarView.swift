@@ -24,17 +24,34 @@ struct MenuBarView: View {
 
             if !engine.liveAlerts.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("LIVE ALERTS")
+                    Text("LIVE DETECTIONS")
                         .font(.caption2)
-                        .foregroundStyle(.red)
-                    ForEach(engine.liveAlerts.prefix(4)) { alert in
-                        Text(alert.text)
-                            .font(.system(size: 11))
-                            .lineLimit(2)
+                        .foregroundStyle(.secondary)
+                    ForEach(engine.liveAlerts.prefix(5)) { alert in
+                        HStack(alignment: .top, spacing: 6) {
+                            Image(systemName: alert.cleaned ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                                .foregroundStyle(alert.cleaned ? .green : .red)
+                                .font(.system(size: 11))
+                            VStack(alignment: .leading, spacing: 0) {
+                                Text(alert.cleaned ? "CLEANED" : "ACTION NEEDED")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(alert.cleaned ? .green : .red)
+                                Text(alert.text.replacingOccurrences(of: "🚨 ", with: ""))
+                                    .font(.system(size: 11))
+                                    .lineLimit(3)
+                            }
+                        }
                     }
-                    Button("Dismiss all") { engine.clearAlerts() }
-                        .buttonStyle(.link)
-                        .font(.caption)
+                    HStack {
+                        Button("Open quarantine") {
+                            let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                                .appendingPathComponent("PolinShield/Quarantine")
+                            NSWorkspace.shared.open(url)
+                        }
+                        Button("Dismiss") { engine.clearAlerts() }
+                    }
+                    .buttonStyle(.link)
+                    .font(.caption)
                 }
                 .padding(12)
             }
@@ -92,6 +109,28 @@ struct MenuBarView: View {
 
             Divider()
 
+            if engine.isAuditing || engine.lastAuditDate != nil {
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack {
+                        Text("GITHUB CREDENTIAL AUDIT")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if engine.isAuditing { ProgressView().controlSize(.mini) }
+                        else if let d = engine.lastAuditDate { Text(d, style: .relative).font(.caption2).foregroundStyle(.secondary) }
+                    }
+                    ForEach(Array(engine.credentialAudit.split(separator: "\n").enumerated()), id: \.offset) { _, line in
+                        Text(String(line))
+                            .font(.system(size: 11))
+                            .foregroundStyle(line.hasPrefix("🚨") ? .red : line.hasPrefix("⚠") ? .orange : .primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(12)
+
+                Divider()
+            }
+
             // Actions
             VStack(spacing: 6) {
                 Button {
@@ -119,7 +158,7 @@ struct MenuBarView: View {
                 } label: {
                     HStack {
                         Image(systemName: "key.viewfinder")
-                        Text("Audit GitHub Credentials")
+                        Text(engine.isAuditing ? "Auditing…" : "Audit GitHub Credentials")
                         Spacer()
                     }
                     .padding(.horizontal, 12)
