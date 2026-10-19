@@ -7,3 +7,4 @@ xcuserdata/
 *.dmg
 *.app
 node_modules/
+config.bat
