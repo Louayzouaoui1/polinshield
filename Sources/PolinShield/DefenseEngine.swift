@@ -54,14 +54,26 @@ class DefenseEngine: ObservableObject {
     init() {
         loadHistory()
         loadForcePushHistory()
+        ingestScheduledScan()
         startScanTimer()
+        Task { await runDailyScanIfDue() }
+    }
+
+    /// The app owns the daily scan: a bare /bin/bash under launchd has no TCC access to
+    /// ~/Desktop, so the launchd job can only see processes/persistence. Runs once per
+    /// day, any time after 09:00 — so a Mac that was closed at 9 scans when it's opened.
+    func runDailyScanIfDue() async {
+        guard !isScanning, Calendar.current.component(.hour, from: Date()) >= 9,
+              !(scanHistory.first(where: { !$0.log.hasPrefix("[scheduled") }).map { Calendar.current.isDateInToday($0.date) } ?? false)
+        else { return }
+        await runScan()
     }
 
     func startScanTimer() {
         scanTimer?.invalidate()
-        // Hourly force-push check
+        // Hourly: force-push check + pick up the 9am launchd scan's result
         scanTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in
-            Task { await self?.checkForcePushes() }
+            Task { await self?.checkForcePushes(); await self?.ingestScheduledScan(); await self?.runDailyScanIfDue() }
         }
     }
 
@@ -90,6 +102,8 @@ class DefenseEngine: ObservableObject {
         case .dailyScan:
             let plistPath = NSString(string: "~/Library/LaunchAgents/dev.polinshield.scan.plist").expandingTildeInPath
             return FileManager.default.fileExists(atPath: plistPath)
+        case .autoHeal:
+            return FileManager.default.fileExists(atPath: supportDir().appendingPathComponent("auto-heal").path)
         }
     }
 
@@ -122,10 +136,36 @@ class DefenseEngine: ObservableObject {
         lastScanDate = Date()
         saveHistory()
 
-        if !indicators.isEmpty {
-            sendNotification(title: "🚨 PolinShield: Malware indicators found",
-                             body: "\(indicators.count) indicator(s) detected. Open dashboard for details.")
-        }
+        notifyIfNeeded(indicators: indicators, output: result.output)
+    }
+
+    func notifyIfNeeded(indicators: [String], output: String) {
+        guard !indicators.isEmpty else { return }
+        let healed = output.split(separator: "\n").filter { $0.contains("🩹") }.count
+        sendNotification(title: "🚨 PolinShield: Malware indicators found",
+                         body: "\(indicators.count) indicator(s) detected" + (healed > 0 ? ", \(healed) auto-healed" : "") + ". Open dashboard for details.")
+    }
+
+    /// The 9am launchd scan only writes to scan-out.log; pull its latest block into the
+    /// history (and notify) so scheduled scans show up in the app like manual ones.
+    func ingestScheduledScan() {
+        let logURL = supportDir().appendingPathComponent("scan-out.log")
+        guard let text = try? String(contentsOf: logURL, encoding: .utf8),
+              let block = text.components(separatedBy: "PolinShield scan started at ").last,
+              block.contains("Scan completed at") else { return }
+        let key = "scheduled:" + String(block.prefix(while: { $0 != "\n" }))
+        guard UserDefaults.standard.string(forKey: "lastIngestedScan") != key else { return }
+        UserDefaults.standard.set(key, forKey: "lastIngestedScan")
+        let mtime = (try? FileManager.default.attributesOfItem(atPath: logURL.path)[.modificationDate] as? Date) ?? Date()
+        let indicators = parseIndicators(block)
+        let scan = ScanResult(date: mtime, exitCode: 0, foundIndicators: indicators,
+                              log: "[scheduled launchd scan — processes/persistence/toolchain only; Desktop files are covered by the app's own daily scan]\nPolinShield scan started at " + block)
+        scanHistory.insert(scan, at: 0)
+        scanHistory.sort { $0.date > $1.date }
+        if scanHistory.count > 100 { scanHistory.removeLast() }
+        lastScanDate = scanHistory.first?.date
+        saveHistory()
+        notifyIfNeeded(indicators: indicators, output: block)
     }
 
     @Published var lastInstallOutput: String = ""
@@ -138,6 +178,7 @@ class DefenseEngine: ObservableObject {
         case .gitHook: scriptName = "install-git-hook"
         case .forcePushWatcher: scriptName = "install-force-push-watcher"
         case .dailyScan: scriptName = "install-daily-scan"
+        case .autoHeal: scriptName = "install-auto-heal"
         }
         guard let path = scriptPath(scriptName) else {
             lastInstallOutput = "ERROR: \(scriptName).sh not found in bundle"
@@ -159,7 +200,7 @@ class DefenseEngine: ObservableObject {
     @Published var isCheckingForcePushes = false
     @Published var lastForcePushCheck: Date?
 
-    func checkForcePushes(notify: Bool = true) async {
+    func checkForcePushes() async {
         guard let path = scriptPath("check-force-pushes") else { return }
         isCheckingForcePushes = true
         defer { isCheckingForcePushes = false; lastForcePushCheck = Date() }
@@ -173,13 +214,6 @@ class DefenseEngine: ObservableObject {
         forcePushHistory.insert(contentsOf: newOnes, at: 0)
         if forcePushHistory.count > 200 { forcePushHistory = Array(forcePushHistory.prefix(200)) }
         saveForcePushHistory()
-
-        if notify && !newOnes.isEmpty {
-            // Name the repos/branches in the notification itself; first 3, then "+N more".
-            var targets = newOnes.prefix(3).map { "\($0.repo)/\($0.branch)" }.joined(separator: ", ")
-            if newOnes.count > 3 { targets += " +\(newOnes.count - 3) more" }
-            sendNotification(title: "⚠️ Unexpected GitHub force-push detected", body: targets)
-        }
     }
 
     func parseForcePushOutput(_ output: String) -> [ForcePushEvent] {
@@ -288,6 +322,7 @@ struct Defense: Identifiable, Equatable {
         case gitHook = "git-hook"
         case forcePushWatcher = "force-push-watcher"
         case dailyScan = "daily-scan"
+        case autoHeal = "auto-heal"
     }
     let id: ID
     let title: String
@@ -310,6 +345,9 @@ struct Defense: Identifiable, Equatable {
               needsSudo: false),
         .init(id: .dailyScan, title: "Daily 9am malware scan",
               description: "Searches your Desktop for known malware indicators.",
+              needsSudo: false),
+        .init(id: .autoHeal, title: "Auto-heal on detection",
+              description: "Every scan kills the implant, sinkholes persistence paths, removes malicious LaunchAgents and strips injected payloads. Originals are backed up to Application Support/PolinShield/quarantine.",
               needsSudo: false),
     ]
 }

@@ -56,11 +56,6 @@ done <<<"$candidates"
 if [ -n "$forced" ]; then
   echo "[$NOW] Force-pushes since $SINCE:" >> "$LOG"
   printf '%s' "$forced" >> "$LOG"
-  count=$(printf '%s' "$forced" | grep -c '^.')
-  # Name the repos/branches in the notification itself; first 3, then "+N more".
-  targets=$(printf '%s' "$forced" | awk 'NF{print $2}' | head -3 | paste -sd ',' - | sed 's/,/, /g')
-  [ "$count" -gt 3 ] && targets="$targets +$((count - 3)) more"
-  osascript -e "display notification \"${targets//\"/\\\"}\" with title \"🚨 Force-push: PolinShield\" sound name \"Sosumi\"" 2>/dev/null || true
 fi
 echo "$NOW" > "$SINCE_FILE"
 WATCH

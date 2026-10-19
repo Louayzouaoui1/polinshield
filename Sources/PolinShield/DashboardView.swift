@@ -307,7 +307,7 @@ struct ForcePushesPane: View {
                 }
                 Spacer()
                 Button {
-                    Task { await engine.checkForcePushes(notify: false) }
+                    Task { await engine.checkForcePushes() }
                 } label: {
                     if engine.isCheckingForcePushes {
                         HStack { ProgressView().controlSize(.small); Text("Checking…") }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PolinShield: Layer 5 - Daily 9am malware scan
+# PolinShield: Layer 5 - Daily 9am malware scan (or at next login if the Mac was off at 9)
 set -uo pipefail
 
 DIR="$HOME/Library/Application Support/PolinShield"
@@ -17,7 +17,9 @@ cat > "$HOME/Library/LaunchAgents/dev.polinshield.scan.plist" <<PLIST
   <key>ProgramArguments</key><array>
     <string>/bin/bash</string>
     <string>$APP_SCAN</string>
+    <string>--daily</string>
   </array>
+  <key>RunAtLoad</key><true/>
   <key>StartCalendarInterval</key><dict>
     <key>Hour</key><integer>9</integer>
     <key>Minute</key><integer>0</integer>

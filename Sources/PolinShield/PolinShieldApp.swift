@@ -3,6 +3,7 @@
 import SwiftUI
 import AppKit
 import UserNotifications
+import ServiceManagement
 
 // MARK: - App Entry
 
@@ -40,6 +41,9 @@ struct PolinShieldApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)  // Hide dock icon
+        // Start at login so the daily scan runs whenever the Mac is opened (can be turned off
+        // in System Settings → General → Login Items).
+        if SMAppService.mainApp.status != .enabled { try? SMAppService.mainApp.register() }
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
         Task { await DefenseEngine.shared.refreshStatus() }
     }
